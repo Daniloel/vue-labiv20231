@@ -1,67 +1,99 @@
 <template>
   <div class="about">
-    <h1>Olá {{ nome }}!</h1>
-    <input type="text" v-model="nome"/>
-    <p v-if="nome.length > 5">Texto longo</p>
-    <p v-else>Texto curto</p>
-    <input type="password" v-model="senha"/>
+    <h1>Bem vindo {{ nome }}</h1>
+
+    <label for="descricao">descricao: </label>
+    <input id="descricao" type="text" v-model="descricao" />
+    <label for="dataHoraInicio">dataHoraInicio: </label>
+    <input id="dataHoraInicio" type="datetime-local" v-model="dataHoraInicio" />
+    <label for="duracao">duracao: </label>
+    <input id="duracao" type="integer" v-model="duracao" />
     <button @click="cadastrar">Cadastrar</button>
-    <p>{{ contador }} <button @click="incrementar">Incrementar</button></p>
-    <button @click="atualizar">Atualizar</button>
+
+
+
+    <input type="text" v-model="nome" />
+
     <table>
       <thead>
-        <td>Id</td>
-        <td>Nome</td>
+        
+        <td>Descrição</td>
+        <td>Data/Hora</td>
+        <td>Duração</td>
+        
       </thead>
       <tr v-for="usuario in usuarios" :key="usuario.id">
-        <td>{{ usuario.id }}</td>
-        <td>{{ usuario.nome }}</td>
+        
+        <td>{{ usuario.descricao }}</td>
+        <td>{{ usuario.dataHoraInicio }}</td>
+        <td>{{ usuario.duracao }} {{ 'h' }}</td>
+        
       </tr>
     </table>
   </div>
 </template>
 
+
+
+
+
+
+
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import { onBeforeMount} from 'vue';
 import axios from 'axios';
-import { useLoginStore } from '@/stores/login';
 
-const nome = ref("Mineda");
-const senha = ref("senha123");
 
-const usuarios = ref([
-  { id: 1, nome: 'mineda', senha: '123' },
-  { id: 2, nome: 'bla', senha: '1234'}
-]);
+const nome = ref("Nome");
+const usuarios = ref();
 
-const contador = ref(1);
 
-const store = useLoginStore();
 
-const config = {
-  headers: {
-    authorization: store.token
-  }
-};
-
-function incrementar() {
-  contador.value++;
-}
 
 async function atualizar() {
-  usuarios.value = (await axios.get('usuario', config)).data;
+  usuarios.value = (await axios.get("https://8080-daniloel-springlabiv202-31witasphlu.ws-us98.gitpod.io/consulta")).data;
 }
+
+
+
+const descricao = ref();
+const dataHoraInicio = ref();
+const duracao = ref();
+
 
 async function cadastrar() {
-  await axios.post('usuario',  
+  await axios.post("https://8080-daniloel-springlabiv202-31witasphlu.ws-us98.gitpod.io/consulta",
     {
-      nome: nome.value,
-      senha: senha.value
+      descricao: descricao.value,
+      dataHoraInicio: dataHoraInicio.value,
+      duracao: duracao.value,
+      
     });
+
   atualizar();
+
+  limparInput();
+
 }
 
+
+function limparInput() {
+  descricao.value = '';
+  dataHoraInicio.value = '';
+  duracao.value = '';
+}
+
+
 onMounted(() => {
-  atualizar();
+    atualizar();
+    
+
+  });
+
+onBeforeMount(() => {
+  limparInput();
 });
+
+  
 </script>
